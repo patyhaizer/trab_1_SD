@@ -45,15 +45,15 @@ func connectionHandler(connection net.Conn) {
     arrayOfCommands := strings.Split(cleanedInputCommandString, " ")
 
     fmt.Println(arrayOfCommands[0])
-    sendFileToClient(arrayOfCommands[1], connection)
+    sendFileToClient("src/"+arrayOfCommands[1], connection)
     
 
 }
 
 func sendFileToClient(fileName string, connection net.Conn) {
-    var currentByte int64 = 0
+   // var currentByte int64 = 0
     fmt.Println("send to client")
-    fileBuffer := make([]byte, BUFFER_SIZE)
+    
 
     //file to read
     file, err := os.Open(strings.TrimSpace(fileName)) // For read access.
@@ -61,20 +61,29 @@ func sendFileToClient(fileName string, connection net.Conn) {
 
         log.Fatal(err)
     }
-    var err2 error
+    //var err2 error
+    var n int64
+	n, err = io.Copy(connection, file)
+	if err != nil {
+    	log.Fatal(err)
+	}
+	fmt.Println(n, "bytes sent")
+
 
     //read file until there is an error
-    for {
-
-        _, err2 = file.ReadAt(fileBuffer, currentByte)
-        currentByte += BUFFER_SIZE
-        fmt.Println(fileBuffer)
-        connection.Write(fileBuffer)
-
-        if err2 == io.EOF {
-            break
-        }
-    }
+//    for {
+//	fileBuffer := make([]byte, BUFFER_SIZE)
+//	var n int
+//        n, err2 = file.ReadAt(fileBuffer, currentByte)
+//        currentByte += BUFFER_SIZE
+//        fmt.Println(fileBuffer[:n])
+//        connection.Write(fileBuffer[:n])
+//
+//        if err2 == io.EOF {
+//        	fmt.Println("EOF")
+//            break
+//        }
+//    }
 
     file.Close()
     return

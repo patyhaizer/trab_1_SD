@@ -11,7 +11,8 @@ func test (name string) {
 
 func main() {
 	client.Run()
-	//go client.Run()
+	fmt.Println("saiu")
+	client.Run()
 	//go client.Run()
 	
 	var input string

@@ -7,7 +7,7 @@ import (
 	//"net/rpc"
 	"log"
 	//"time"
-    "bytes"
+    //"bytes"
     "io"
     "os"
     "strings"
@@ -22,7 +22,7 @@ func Run(){
 	}
 	
 	//read from
-	var fileName string = "test.rtf"
+	var fileName string = "test.docx"
 
     getFileFromServer(fileName, conn)
 	
@@ -31,10 +31,9 @@ func Run(){
 
 func getFileFromServer(fileName string, connection net.Conn) {
 	fmt.Println("getfile")
-    var currentByte int64 = 0
+    //var currentByte int64 = 0
 
-    fileBuffer := make([]byte, BUFFER_SIZE)
-
+    
     var err error
     file, err := os.Create(strings.TrimSpace("src/client/"+fileName))
     if err != nil {
@@ -42,21 +41,34 @@ func getFileFromServer(fileName string, connection net.Conn) {
     }
     fmt.Println(fileName)
     connection.Write([]byte("get " + fileName))
-    for {
+    var n int64
+    n, err = io.Copy(file, connection)
+    fmt.Println(n, "bytes received")
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Println(n, "bytes received")
 
-        connection.Read(fileBuffer)
-        cleanedFileBuffer := bytes.Trim(fileBuffer, "\x00")
-
-        _, err = file.WriteAt(cleanedFileBuffer, currentByte)
-
-        currentByte += BUFFER_SIZE
-
-        if err == io.EOF {
-            break
-        }
-
-    }
-
+    
+//    for {
+//	fileBuffer := make([]byte, BUFFER_SIZE)
+//	var n int
+//        n,err=connection.Read(fileBuffer)
+//        //cleanedFileBuffer := bytes.Trim(fileBuffer, "\x00")
+//		fmt.Println(fileBuffer[:n])
+//		if err == io.EOF {
+//        	fmt.Println("EOF")
+//            break
+//        }
+//        _,err = file.WriteAt(fileBuffer[:n], currentByte)
+//	if err == io.EOF {
+//        	fmt.Println("EOF")
+//            break
+//        }
+//        currentByte += BUFFER_SIZE
+//
+//    }
+fmt.Println("close")
     file.Close()
     return
 }
