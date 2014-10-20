@@ -3,17 +3,18 @@ package main
 import (
 	"client"
 	"fmt"
+	"strconv"
 )
 
-func test (name string) {
-	fmt.Println(name) 
-}
-
 func main() {
-	go client.Run("1")
-	//fmt.Println("saiu")
-	go client.Run("2")
-	//go client.Run()
+	fileName :="test.docx"
+	
+	//creating n clients
+	n :=5
+	
+	for i := 0; i < n; i++ {
+        go client.Run(strconv.Itoa(i),fileName)
+    }
 	
 	var input string
     fmt.Scanln(&input)

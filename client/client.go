@@ -6,12 +6,11 @@ import (
 	"net"
 	"net/rpc"
 	"log"
-	//"time"
+	"time"
     //"bytes"
     //"io"
     "os"
     "strings"
-    //"encoding/gob"
 )
 const BUFFER_SIZE = 1024
 type Reply struct {
@@ -23,86 +22,53 @@ type Args struct {
 	FileName string
 	CurrentByte int64
 }
-func Run(id string){
+func Run(id string,fileName string){
+	//time of request of connection
+	t0 := time.Now()
+	//Creating connection with Server
 	conn, err := net.Dial("tcp", "127.0.0.1:1234")
 	if err != nil {
 		log.Fatal("dialing:", err)
 	}
+	//Creating rpc Client
 	client := rpc.NewClient(conn)
+	//calling funtion to get file from server and write on client
+	getFileFromServer(id,client,fileName)
+	
+	//time - end of file download
+	t1 := time.Now()
+	fmt.Printf("The download of file of client %s took %v to run.\n",id, t1.Sub(t0))
+	conn.Close()
+}
+
+func getFileFromServer(id string,client *rpc.Client,fileName string) {
+	
 	//file to write to
-	fileName := "test"
-	file, err := os.Create(strings.TrimSpace("src/client/"+fileName+id+".docx"))
+	file, err := os.Create(strings.TrimSpace("src/client/"+id+fileName))
 	if err != nil {
 		log.Fatal(err)
 	}
 	var reply Reply
 	args := &Args{BUFFER_SIZE,fileName,0}
+	
 	for {
 		err = client.Call("FileTransfer.GetFile", args, &reply)
 		if err != nil {
 			log.Println("arith error:", err)
 			break
 		}
-		fmt.Println(reply.Data)
+
 		_,err = file.WriteAt(reply.Data[:reply.N], args.CurrentByte)
 		if err != nil {
 			log.Println("arith error2:", err)
 			break
 		}
-		args.CurrentByte+=BUFFER_SIZE
 		if reply.EOF == 1 {
 			break
 		}
+		args.CurrentByte+=BUFFER_SIZE
 
     }
-	fmt.Println("fim")
-	file.Close()
-	
-	conn.Close()
-}
 
-//func getFileFromServer(fileName string, connection net.Conn) {
-//	fmt.Println("getfile")
-//    //var currentByte int64 = 0
-//
-//    
-//    var err error
-//    file, err := os.Create(strings.TrimSpace("src/client/"+fileName))
-//    if err != nil {
-//        log.Fatal(err)
-//    }
-//    fmt.Println(fileName)
-//    connection.Write([]byte("get " + fileName))
-//    var n int64
-//    n, err = io.Copy(file, connection)
-//    fmt.Println(n, "bytes received")
-//if err != nil {
-//    log.Fatal(err)
-//}
-//fmt.Println(n, "bytes received")
-//
-//    
-////    for {
-////	fileBuffer := make([]byte, BUFFER_SIZE)
-////	var n int
-////        n,err=connection.Read(fileBuffer)
-////        //cleanedFileBuffer := bytes.Trim(fileBuffer, "\x00")
-////		fmt.Println(fileBuffer[:n])
-////		if err == io.EOF {
-////        	fmt.Println("EOF")
-////            break
-////        }
-////        _,err = file.WriteAt(fileBuffer[:n], currentByte)
-////	if err == io.EOF {
-////        	fmt.Println("EOF")
-////            break
-////        }
-////        currentByte += BUFFER_SIZE
-////
-////    }
-//fmt.Println("close")
-//    file.Close()
-//    return
-//}
-//
-//
+	file.Close()
+}
