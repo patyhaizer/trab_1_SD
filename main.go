@@ -10,9 +10,9 @@ func test (name string) {
 }
 
 func main() {
-	client.Run()
-	fmt.Println("saiu")
-	client.Run()
+	go client.Run("1")
+	//fmt.Println("saiu")
+	go client.Run("2")
 	//go client.Run()
 	
 	var input string
