@@ -2,22 +2,26 @@ package main
 
 import (
 	"client"
-	"fmt"
+	//"fmt"
 	"strconv"
+	"sync"
 )
 
 func main() {
-	fileName :="test.docx"
+	//100k file
+	fileName :="ExpressoesRegulares.pdf"
 	
 	//creating n clients
-	n :=5
+	n := 5
+	var wg sync.WaitGroup
 	
-	for i := 0; i < n; i++ {
+	for i := 1; i < n+1; i++ {
+		wg.Add(1)
         go client.Run(strconv.Itoa(i),fileName)
     }
-	
-	var input string
-    fmt.Scanln(&input)
+	wg.Wait()
+//	var input string
+//    fmt.Scanln(&input)
 }
 
 

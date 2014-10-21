@@ -22,7 +22,8 @@ func main(){
 			log.Fatal("accept error: " + err.Error())
 		} else {
 			log.Printf("new connection established\n")
-			rpc.ServeConn(conn)
+			go rpc.ServeConn(conn)
 		}
 	}
 }
+
