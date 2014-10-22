@@ -20,15 +20,15 @@ func main(){
 	}
 	
 	//creating a semaphore
-	concurrency := 3
+	concurrency := 10
 	sem := make(chan bool, concurrency)
 
 	for  {
+		sem <- true
 		if conn, err := listener.Accept(); err != nil {
 			log.Fatal("accept error: " + err.Error())
 		} else {
 			log.Printf("new connection established\n")
-			sem <- true
 			go func (net.Conn) {
 				defer func() { <-sem } ()
 				rpc.ServeConn(conn)
